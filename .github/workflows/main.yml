@@ -33,7 +33,7 @@ jobs:
         with:
           context: .
           push: true
-          tags: your-dockerhub-username/your-repo:${{ github.sha }}
+          tags: requerty/test_repoqq2:${{ github.sha }}
           cache-from: type=local,src=/tmp/.buildx-cache
           cache-to: type=local,dest=/tmp/.buildx-cache
 
