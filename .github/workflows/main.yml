@@ -46,6 +46,5 @@ jobs:
             🚀 Рабочий процесс GitHub Actions завершен!
             📦 Репозиторий: ${{ github.repository }}
             🏷️ Ветка: ${{ github.ref_name }}
-            📋 SHA: ${{ github.sha }}
             ✅ Статус: ${{ job.status }}
         if: always()
