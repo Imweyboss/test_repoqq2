@@ -44,16 +44,16 @@ jobs:
           cache-to: type=local,dest=/tmp/.buildx-cache
 
       - name: Deploy to AWS App Runner
-        uses: aws-actions/aws-app-runner-action@v1
+        uses: aws-actions/app-runner-action@v1
         with:
-          SERVICE_ARN: arn:aws:apprunner:us-east-1:xxxxxxxxxxxx:service/my-service/xxxxxxxxxxxxxxxx
+          SERVICE_ARN: arn:aws:apprunner:us-east-1:396026983375.dkr.ecr.us-east-1.amazonaws.com/testrepoqq
           OPERATION: start-deployment
           IMAGE_REPOSITORY: ${{ steps.login-ecr.outputs.registry }}/test_repoqq2
           IMAGE_TAG: ${{ github.sha }}
 
       - name: Send Telegram notification
         if: always()
-        uses: appleboy/telegram-action@v0.1.5
+        uses: appleboy/telegram-action@master
         with:
           to: ${{ secrets.TELEGRAM_CHAT_ID }}
           token: ${{ secrets.TELEGRAM_TOKEN }}
