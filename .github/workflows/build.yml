@@ -49,8 +49,11 @@ jobs:
 
       - name: Create or update App Runner service
         run: |
-          SERVICE_NAME=my-service
+          SERVICE_NAME=test_
+          echo "Listing App Runner services..."
+          aws apprunner list-services
           SERVICE_ARN=$(aws apprunner list-services --query "ServiceSummaryList[?ServiceName=='$SERVICE_NAME'].ServiceArn" --output text)
+          echo "Service ARN: $SERVICE_ARN"
           if [ "$SERVICE_ARN" == "None" ]; then
             echo "Creating new App Runner service..."
             aws apprunner create-service \
@@ -60,5 +63,6 @@ jobs:
             echo "Updating existing App Runner service..."
             aws apprunner update-service \
               --service-arn $SERVICE_ARN \
-              --source-configuration "RepositoryType=ECR,ImageRepository=$REGISTRY/$REPOSITORY:${{ github.ref_name }},ImageConfiguration={Port=80}"
+              --source-configuration "RepositoryType=ECR,ImageRepository=$REGISTRY/$REPOSITORY:${{ github.ref_name }},ImageConfiguration={Port=80}}"
           fi
+
