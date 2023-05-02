@@ -3,6 +3,8 @@ name: Simple Docker build with Telegram notifications
 on:
   push:
     branches: ['main']
+    tags:
+      - 'v*'
 
 jobs:
   build:
