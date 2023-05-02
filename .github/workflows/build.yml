@@ -37,15 +37,3 @@ jobs:
           tags: requerty/test_repoqq2:${{ github.sha }}
           cache-from: type=local,src=/tmp/.buildx-cache
           cache-to: type=local,dest=/tmp/.buildx-cache
-
-      - name: Send Telegram notification
-        uses: appleboy/telegram-action@master
-        with:
-          to: ${{ secrets.TELEGRAM_CHAT_ID }}
-          token: ${{ secrets.TELEGRAM_TOKEN }}
-          message: |
-            🚀 Рабочий процесс GitHub Actions завершен!
-            📦 Репозиторий: ${{ github.repository }}
-            🏷️ Ветка: ${{ github.ref_name }}
-            ✅ Статус: ${{ job.status }}
-        if: always()
