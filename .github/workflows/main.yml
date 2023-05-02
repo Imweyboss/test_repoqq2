@@ -2,7 +2,8 @@ name: Simple Docker build with Telegram notifications
 
 on:
   push:
-    branches: ['main']
+    branches:
+      - main
     tags:
       - 'v*'
 
