@@ -39,7 +39,7 @@ jobs:
         with:
           context: .
           push: true
-          tags: ${{ steps.login-ecr.outputs.registry }}/your-repo-name:${{ github.sha }}
+          tags: ${{ steps.login-ecr.outputs.registry }}/test_repoqq2:${{ github.sha }}
           cache-from: type=local,src=/tmp/.buildx-cache
           cache-to: type=local,dest=/tmp/.buildx-cache
 
@@ -52,7 +52,7 @@ jobs:
 
       - name: Deploy to AWS App Runner
         run: |
-          aws apprunner start-deployment --service-arn arn:aws:apprunner:us-east-1:396026983375.dkr.ecr.us-east-1.amazonaws.com/testrepoqq --source-configuration ImageRepository=${{ steps.login-ecr.outputs.registry }}/your-repo-name,ImageTag=${{ github.sha }}
+          aws apprunner start-deployment --service-arn arn:aws:apprunner:us-east-1:396026983375.dkr.ecr.us-east-1.amazonaws.com/testrepoqq --source-configuration ImageRepository=${{ steps.login-ecr.outputs.registry }}/test_repoqq2,ImageTag=${{ github.sha }}
 
       - name: Send Telegram notification
         if: always()
