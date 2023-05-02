@@ -54,7 +54,7 @@ jobs:
           aws apprunner list-services
           SERVICE_ARN=$(aws apprunner list-services --query "ServiceSummaryList[?ServiceName=='$SERVICE_NAME'].ServiceArn" --output text)
           echo "Service ARN: $SERVICE_ARN"
-          if [ "$SERVICE_ARN" == "None" ]; then
+          if [ -z "$SERVICE_ARN" ]; then
             echo "Creating new App Runner service..."
             aws apprunner create-service \
               --service-name $SERVICE_NAME \
@@ -65,4 +65,5 @@ jobs:
               --service-arn $SERVICE_ARN \
               --source-configuration "RepositoryType=ECR,ImageRepository=$REGISTRY/$REPOSITORY:${{ github.ref_name }},ImageConfiguration={Port=80}}"
           fi
+
 
