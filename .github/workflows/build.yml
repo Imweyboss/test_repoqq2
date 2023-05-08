@@ -58,13 +58,14 @@ jobs:
             echo "Creating new App Runner service..."
             aws apprunner create-service \
               --service-name $SERVICE_NAME \
-              --source-configuration "RepositoryType=ECR,ImageRepository=$REGISTRY/$REPOSITORY:${{ github.ref_name }},ImageConfiguration={Port=80}"
+              --source-configuration "ImageRepository=$REGISTRY/$REPOSITORY:${{ github.ref_name }},Port=80,RuntimeEnvironmentVariables={MY_ENV_VAR=my-value}"
           else
             echo "Updating existing App Runner service..."
             aws apprunner update-service \
               --service-arn $SERVICE_ARN \
-              --source-configuration "RepositoryType=ECR,ImageRepository=$REGISTRY/$REPOSITORY:${{ github.ref_name }},ImageConfiguration={Port=80}}"
+              --source-configuration "ImageRepository=$REGISTRY/$REPOSITORY:${{ github.ref_name }},Port=80,RuntimeEnvironmentVariables={MY_ENV_VAR=my-value}"
           fi
+
           
       - name: Setup EventBridge and SNS for App Runner container deployment notifications
         if: steps.create_service.outcome == 'success' || steps.update_service.outcome == 'success'
