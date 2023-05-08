@@ -60,14 +60,14 @@ jobs:
             echo "Creating new App Runner service..."
             aws apprunner create-service \
               --service-name $SERVICE_NAME \
-              --source-configuration "{\"ImageRepository\": \"$REGISTRY/$REPOSITORY:latest\", \"Port\": \"80\"}" \
+              --source-configuration "{\"ImageRepository\": {\"RepositoryUri\": \"$REGISTRY/$REPOSITORY:latest\", \"Port\": \"80\"}}" \
               --instance-configuration "Cpu=1 vCPU,Memory=2 GB" \
               --region us-east-1
           else
             echo "Updating existing App Runner service..."
             aws apprunner update-service \
               --service-arn $SERVICE_ARN \
-              --source-configuration "{\"ImageRepository\": \"$REGISTRY/$REPOSITORY:latest\", \"Port\": \"80\"}" \
+              --source-configuration "{\"ImageRepository\": {\"RepositoryUri\": \"$REGISTRY/$REPOSITORY:latest\", \"Port\": \"80\"}}" \
               --instance-configuration "Cpu=1 vCPU,Memory=2 GB" \
               --region us-east-1
           fi
