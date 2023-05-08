@@ -59,15 +59,15 @@ jobs:
             echo "Registry: $REGISTRY"
             aws apprunner create-service \
               --service-name $SERVICE_NAME \
-              --source-configuration ImageRepository=$REGISTRY/$REPOSITORY:${{ github.ref_name }} \
-              --instance-configuration "Cpu=1 vCPU,Memory=2 GB,Port=80" \
+              --source-configuration "{\"ImageRepository\": \"$REGISTRY/$REPOSITORY:${{ github.ref_name }}\", \"Port\": \"80\"}" \
+              --instance-configuration "Cpu=1 vCPU,Memory=2 GB" \
               --region us-east-1
           else
             echo "Updating existing App Runner service..."
             aws apprunner update-service \
               --service-arn $SERVICE_ARN \
-              --source-configuration ImageRepository=$REGISTRY/$REPOSITORY:${{ github.ref_name }} \
-              --instance-configuration "Cpu=1 vCPU,Memory=2 GB,Port=80" \
+              --source-configuration "{\"ImageRepository\": \"$REGISTRY/$REPOSITORY:${{ github.ref_name }}\", \"Port\": \"80\"}" \
+              --instance-configuration "Cpu=1 vCPU,Memory=2 GB" \
               --region us-east-1
           fi
 
