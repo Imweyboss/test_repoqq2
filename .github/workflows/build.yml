@@ -35,41 +35,42 @@ jobs:
         uses: aws-actions/amazon-ecr-login@v1
 
       - name: Build, tag, and push docker image to Amazon ECR
-        env:
-          REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-          REPOSITORY: testrepoqq
-          IMAGE_TAG: ${{ github.sha }}
-        run: |
-          docker build \
-          -t $REGISTRY/$REPOSITORY:$IMAGE_TAG \
-          -t $REGISTRY/$REPOSITORY:${{ github.ref_name }} \
-          .
-          docker push $REGISTRY/$REPOSITORY:$IMAGE_TAG
-          docker push $REGISTRY/$REPOSITORY:${{ github.ref_name }}
+      env:
+        REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+        REPOSITORY: testrepoqq
+        IMAGE_TAG: ${{ github.sha }}
+      run: |
+        docker build \
+        -t $REGISTRY/$REPOSITORY:$IMAGE_TAG \
+        -t $REGISTRY/$REPOSITORY:${{ github.ref_name }} \
+        -t $REGISTRY/$REPOSITORY:latest \
+        .
+        docker push $REGISTRY/$REPOSITORY:$IMAGE_TAG
+        docker push $REGISTRY/$REPOSITORY:${{ github.ref_name }}
+        docker push $REGISTRY/$REPOSITORY:latest
 
-      - name: Create or update App Runner service
-        run: |
-          SERVICE_NAME=test_
-          echo "Listing App Runner services..."
-          aws apprunner list-services
-          SERVICE_ARN=$(aws apprunner list-services --query "ServiceSummaryList[?ServiceName=='$SERVICE_NAME'].ServiceArn" --output text)
-          echo "Service ARN: $SERVICE_ARN"
-          if [ -z "$SERVICE_ARN" ]; then
-            echo "Creating new App Runner service..."
-            echo "Registry: $REGISTRY"
-            aws apprunner create-service \
-              --service-name $SERVICE_NAME \
-              --source-configuration "{\"ImageRepository\": \"$REGISTRY/$REPOSITORY:${{ github.ref_name }}\", \"Port\": \"80\"}" \
-              --instance-configuration "Cpu=1 vCPU,Memory=2 GB" \
-              --region us-east-1
-          else
-            echo "Updating existing App Runner service..."
-            aws apprunner update-service \
-              --service-arn $SERVICE_ARN \
-              --source-configuration "{\"ImageRepository\": \"$REGISTRY/$REPOSITORY:${{ github.ref_name }}\", \"Port\": \"80\"}" \
-              --instance-configuration "Cpu=1 vCPU,Memory=2 GB" \
-              --region us-east-1
-          fi
+    - name: Create or update App Runner service
+      run: |
+        SERVICE_NAME=test_
+        echo "Listing App Runner services..."
+        aws apprunner list-services
+        SERVICE_ARN=$(aws apprunner list-services --query "ServiceSummaryList[?ServiceName=='$SERVICE_NAME'].ServiceArn" --output text)
+        echo "Service ARN: $SERVICE_ARN"
+        if [ -z "$SERVICE_ARN" ]; then
+          echo "Creating new App Runner service..."
+          aws apprunner create-service \
+            --service-name $SERVICE_NAME \
+            --source-configuration "{\"ImageRepository\": \"$REGISTRY/$REPOSITORY:latest\", \"Port\": \"80\"}" \
+            --instance-configuration "Cpu=1 vCPU,Memory=2 GB" \
+            --region us-east-1
+        else
+          echo "Updating existing App Runner service..."
+          aws apprunner update-service \
+            --service-arn $SERVICE_ARN \
+            --source-configuration "{\"ImageRepository\": \"$REGISTRY/$REPOSITORY:latest\", \"Port\": \"80\"}" \
+            --instance-configuration "Cpu=1 vCPU,Memory=2 GB" \
+            --region us-east-1
+        fi
 
       - name: Install Telegram CLI
         run: |
