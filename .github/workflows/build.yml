@@ -7,7 +7,6 @@ on:
 
 jobs:
   build_and_deploy:
-  
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repo
@@ -66,5 +65,29 @@ jobs:
               --service-arn $SERVICE_ARN \
               --source-configuration "RepositoryType=ECR,ImageRepository=$REGISTRY/$REPOSITORY:${{ github.ref_name }},ImageConfiguration={Port=80}}"
           fi
+          
+      - name: Setup EventBridge and SNS for App Runner container deployment notifications
+        if: steps.create_service.outcome == 'success' || steps.update_service.outcome == 'success'
+        env:
+          SNS_TOPIC_NAME: app-runner-deploy-notifications
+        run: |
+          echo "Creating or updating SNS Topic for App Runner container deployment notifications..."
+          SNS_TOPIC_ARN=$(aws sns create-topic --name $SNS_TOPIC_NAME --query TopicArn --output text)
+          echo "SNS Topic ARN: $SNS_TOPIC_ARN"
+          
+          echo "Creating or updating EventBridge rule for App Runner container deployment notifications..."
+          RULE_NAME=app-runner-container-deploy-rule
+          EVENT_PATTERN='{"source": ["aws.apprunner"], "detail-type": ["App Runner container deployment"], "detail": {"ServiceName": ["'$SERVICE_NAME'"]}}'
+          TARGETS="[{\"Arn\":\"$SNS_TOPIC_ARN\",\"Id\":\"SnsTarget\",\"InputTransformer\":{\"InputPathsMap\":{\"DeploymentId\":\"$.id\"},\"InputTemplate\":\"App Runner container deployment (DeploymentId: <DeploymentId>)\"}}]"
+          aws events put-rule --name $RULE_NAME --event-pattern $EVENT_PATTERN --state ENABLED
+          aws events put-targets --rule $RULE_NAME --targets "$TARGETS"
 
 
+      - name: Send Telegram notification on App Runner container deployment
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        if: steps.create_service.outcome == 'success' || steps.update_service.outcome == 'success'
+        run: |
+          MESSAGE="🚀 App Runner container deployment successful for service: *$SERVICE_NAME*."
+          curl -X POST "https://api.telegram.org/bot$TELEGRAM_BOT_TOKEN/sendMessage" -d "chat_id=$TELEGRAM_CHAT_ID&text=$MESSAGE&parse_mode=Markdown"
